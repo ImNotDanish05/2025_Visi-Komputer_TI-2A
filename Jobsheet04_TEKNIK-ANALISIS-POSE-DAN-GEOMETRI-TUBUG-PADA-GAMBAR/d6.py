@@ -34,6 +34,19 @@ def ratio_pushup(lm):
     hp = np.array(lm[23][1:3])
     return np.linalg.norm(sh - wr) / (np.linalg.norm(sh - hp) + 1e-8)
 
+def elbow_angle(lm):
+    # titik kiri: 11=shoulderL, 13=elbowL, 15=wristL
+    sh = np.array(lm[11][1:3])
+    el = np.array(lm[13][1:3])
+    wr = np.array(lm[15][1:3])
+    # hitung sudut siku (menggunakan rumus vektor)
+    a = np.linalg.norm(el - wr)
+    b = np.linalg.norm(sh - el)
+    c = np.linalg.norm(sh - wr)
+    angle = np.degrees(np.arccos((b**2 + a**2 - c**2) / (2*b*a + 1e-8)))
+    return angle
+
+
 # --- Loop utama ---
 while True:
     ok, img = cap.read()
@@ -67,13 +80,13 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
         else:  # MODE == "pushup"
-            r = ratio_pushup(lmList)
-            if r < DOWN_R:
+            ang = elbow_angle(lmList)
+            if ang < 90:
                 flag = "down"
-            elif r > UP_R:
+            elif ang > 150:
                 flag = "up"
 
-            cv2.putText(img, f"Ratio: {r:4.2f}", (20, 70),
+            cv2.putText(img, f"Elbow: {ang:5.1f}", (20, 70),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
         # Debounce logic

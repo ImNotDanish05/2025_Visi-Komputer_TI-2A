@@ -32,7 +32,7 @@ while True:
         cv2.putText(img, f"Fingers: {count} {fingers}",
                     (20, 40),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    0.9, (0, 0, 0), 2)
+                    0.9, (0, 255, 0), 2)
 
     # Tampilkan jendela
     cv2.imshow("Hands + Fingers", img)
