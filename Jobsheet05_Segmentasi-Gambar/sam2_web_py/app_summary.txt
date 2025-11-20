@@ -1,0 +1,153 @@
+You are an AI code generator. Your task is to build a COMPLETE WORKING WEB APP using PYTHON (Flask) as the backend and HTML/JavaScript as the frontend for a SAM 2 (Segment Anything Model 2) demo that can be accessed from a phone browser over Wi-Fi.
+
+You must output FULL CODE for ALL FILES (no “...” or omitted parts). The code must be ready to run after:
+- `pip install -r requirements.txt`
+- `python app.py`
+
+Do NOT write explanations, only the code files.
+
+==================================================
+🎯 GOAL OF THE APPLICATION
+==================================================
+I want the following system:
+
+- The Python backend runs on my laptop (Ryzen 5) and loads SAM 2 to perform image segmentation.
+- The frontend is a simple HTML page that I open from my phone’s browser (Android / iOS) while the phone is on the same Wi-Fi/hotspot as the laptop.
+- The frontend shows:
+  - A LIVE PREVIEW of the phone camera using getUserMedia.
+  - A button “Capture & Process with SAM2”.
+  - An image area that shows the processed result returned from the backend (for example, hair/foreground colored with an overlay).
+
+High-level flow:
+1. The user opens the website from the phone, e.g. `http://192.168.x.x:8000`.
+2. The HTML/JS requests camera permission and shows the camera feed in a `<video>` element.
+3. When the user taps “Capture & Process with SAM2”:
+   - JavaScript takes a single frame from the video (draw it to a `<canvas>`, then convert to Blob or base64).
+   - That frame is sent to the Flask backend using an HTTP POST to `/api/segment`.
+4. The Python backend:
+   - Receives the image.
+   - Calls SAM 2 to perform segmentation.
+   - Creates a mask on the main object (you can choose a simple approach: segment the main subject or hair/upper head; the important part is using SAM2).
+   - Applies a color overlay (for example, a blue tint) only on the masked area.
+   - Sends back the processed image to the frontend, as a base64-encoded PNG or JPEG.
+5. The frontend displays the result under the live preview, e.g. in an `<img>` tag labeled “SAM2 Result”.
+
+==================================================
+🧱 PROJECT STRUCTURE
+==================================================
+Create the following file structure:
+
+- app.py                → main Flask backend
+- requirements.txt      → Python dependencies
+- sam2_utils.py         → helper utilities to load SAM2 and perform segmentation
+- static/
+    - script.js         → JavaScript for camera + sending frame to backend
+    - styles.css        → Simple, mobile-friendly CSS
+- templates/
+    - index.html        → main page (rendered via Flask’s render_template)
+
+Use Flask with Jinja2 templates.
+
+==================================================
+🧪 BACKEND DETAILS (PYTHON + FLASK + SAM2)
+==================================================
+1. Flask setup:
+   - Route `GET /`:
+     - Renders `templates/index.html`.
+   - Route `POST /api/segment`:
+     - Accepts an image from the frontend (either multipart/form-data with a file field, or base64 from JSON; you can choose but implement it fully).
+     - Calls a function from `sam2_utils.py` to run SAM 2 on the image.
+     - Returns JSON like:
+       `{ "image_base64": "data:image/png;base64,...." }`
+
+2. `sam2_utils.py`:
+   - Import required libraries: `opencv-python`, `numpy`, `torch`, and `sam2`.
+   - On module import, load a SAM 2 model ONCE, e.g. a small variant such as `"sam2_hiera_tiny"` using the official `sam2` Python package.
+   - Use `device="cpu"` (no GPU).
+   - Implement a function `segment_and_color(image_bgr: np.ndarray) -> np.ndarray` that:
+     - Resizes the image to a smaller resolution (e.g. 512x512) for faster inference.
+     - Runs SAM 2 to obtain a segmentation mask. You may use a simple strategy such as:
+       - Get masks from SAM 2.
+       - Select the largest or most confident mask as the main target.
+     - Resizes the mask back to the original image size.
+     - Applies a color overlay only on masked pixels (for example: apply a blue or colored tint using OpenCV).
+     - Returns the processed BGR image.
+
+3. `app.py` details:
+   - Initialize Flask.
+   - On startup, import `segment_and_color` from `sam2_utils`, so the model is loaded once.
+   - In the `/api/segment` POST route:
+     - Read the incoming image.
+     - Convert it to a NumPy BGR image using OpenCV.
+     - Call `segment_and_color`.
+     - Convert the result to PNG or JPEG in memory, then to base64.
+     - Return a JSON response with the `image_base64` string prefixed with proper data URI (`"data:image/png;base64,..."`).
+   - Run the app with `host="0.0.0.0"` and `port=8000` so it is accessible from other devices in the same LAN/Wi-Fi.
+   - Add basic CORS handling so the phone browser can call the API (e.g., using `flask-cors` or manual headers).
+
+4. Add sufficient comments inside the Python files to make the logic clear, but do not omit any code.
+
+==================================================
+📱 FRONTEND DETAILS (HTML + JS, MOBILE)
+==================================================
+1. `templates/index.html`:
+   - Basic mobile-first layout.
+   - Use a simple structure like:
+     - `<h1> SAM 2 Camera Demo </h1>`
+     - `<video id="video" autoplay playsinline></video>` → camera live preview.
+     - `<button id="btnCapture">Capture & Process with SAM2</button>`
+     - `<div id="status">Status: idle</div>`
+     - `<img id="resultImage" alt="SAM2 Result" />`
+   - Link `static/styles.css`.
+   - Include `static/script.js`.
+   - Use meta viewport tag so it looks good on mobile.
+
+2. `static/script.js`:
+   - On DOMContentLoaded:
+     - Request camera access using:
+       `navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })`
+       (You may note that `"environment"` could be used for rear camera, but default to `"user"`.)
+     - Set `video.srcObject = stream`.
+   - Create (or use) a hidden `<canvas>` element in JS for capturing frames.
+   - When the user clicks the capture button:
+     - Set the status text to something like “Processing with SAM2...”.
+     - Draw the current video frame into the canvas.
+     - Convert the canvas to Blob (e.g. `canvas.toBlob(...)`) or base64.
+     - Send the frame to `/api/segment` using `fetch`:
+       - If using `FormData`, append the Blob as a file field (e.g. `formData.append("frame", blob, "frame.jpg")`).
+       - Send method: `POST`.
+     - On response:
+       - Parse JSON.
+       - Set `resultImage.src = response.image_base64`.
+       - Update status to “Done” or “Processed by SAM2”.
+   - Handle basic error cases (e.g. show error text in the status div).
+
+3. `static/styles.css`:
+   - Make the page look clean and mobile-friendly:
+     - Use a dark or neutral background.
+     - Use a sans-serif font.
+     - Make the `<video>` and `<img>` elements responsive (`max-width: 100%; height: auto;`).
+     - Style the button to be large and easy to tap on a phone screen.
+     - Center content with some padding.
+
+==================================================
+📦 REQUIREMENTS.TXT
+==================================================
+Create a `requirements.txt` file with all necessary packages, for example:
+
+- flask
+- flask-cors
+- opencv-python
+- numpy
+- torch
+- torchvision
+- sam2
+
+If any additional library is needed by your implementation, list it explicitly.
+
+==================================================
+🔚 FINAL RULES
+==================================================
+- Do NOT include explanations in the output, only the full code for all files.
+- Do NOT shorten any file with comments like “// …” or “# TODO”.
+- Every file (`app.py`, `sam2_utils.py`, `templates/index.html`, `static/script.js`, `static/styles.css`, `requirements.txt`) must be fully written and ready to run.

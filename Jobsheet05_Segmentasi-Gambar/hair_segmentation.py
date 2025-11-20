@@ -29,7 +29,7 @@ MODEL_URL = "https://storage.googleapis.com/mediapipe-models/image_segmenter/sel
 
 # === Change this ID if you want other segmentation parts ===
 # 1 = Hair, 2 = Body-skin, 3 = Face-skin, 4 = Clothes, 5 = Others
-CLASS_ID = 1
+CLASS_ID = 3
 
 def ensure_model(path=MODEL_PATH, url=MODEL_URL):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -78,7 +78,7 @@ def extract_class(img_bgr, mask_u8, class_id=CLASS_ID):
     return result, class_mask
 
 def main():
-    cap = cv2.VideoCapture(2)  # OBS virtual camera
+    cap = cv2.VideoCapture(1)  # OBS virtual camera
     if not cap.isOpened():
         print("[ERROR] Cannot open camera index 2 (OBS).")
         return

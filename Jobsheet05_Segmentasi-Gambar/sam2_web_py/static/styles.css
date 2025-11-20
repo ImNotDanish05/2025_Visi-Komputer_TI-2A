@@ -1,0 +1,132 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap");
+
+:root {
+  --bg: #060a18;
+  --panel: #0f1833;
+  --text: #e8edff;
+  --muted: #9db0d9;
+  --accent: #2ef0ff;
+  --accent-strong: #5af5a6;
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(120% 120% at 20% 20%, rgba(46, 240, 255, 0.1), transparent),
+    radial-gradient(120% 120% at 80% 10%, rgba(90, 245, 166, 0.12), transparent),
+    var(--bg);
+  color: var(--text);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: min(960px, 94vw);
+  margin: 32px auto;
+  padding: 22px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+header h1 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+}
+
+header p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.preview video,
+.result img {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #0b1329;
+  object-fit: cover;
+  min-height: 260px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+button {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  border: none;
+  color: #041025;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  min-width: 220px;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(46, 240, 255, 0.2);
+  filter: brightness(1.04);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#status {
+  font-family: monospace;
+  color: var(--muted);
+}
+
+#status.error {
+  color: #ff9f7a;
+}
+
+.result h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .container {
+    margin: 16px auto;
+    padding: 18px;
+  }
+
+  .preview video,
+  .result img {
+    min-height: 220px;
+  }
+
+  button {
+    width: 100%;
+  }
+}

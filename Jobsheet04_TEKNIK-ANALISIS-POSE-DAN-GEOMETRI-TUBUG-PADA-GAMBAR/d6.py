@@ -10,7 +10,7 @@ DOWN_R, UP_R = 0.85, 1.00     # ambang push-up (rasio)
 SAMPLE_OK = 4                 # minimal frame konsisten sebelum ganti state
 
 # Gunakan kamera index 2
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(1)
 if not cap.isOpened():
     raise RuntimeError("Kamera tidak bisa dibuka.")
 

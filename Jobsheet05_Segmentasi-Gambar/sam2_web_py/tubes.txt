@@ -1,0 +1,9 @@
+# Note:
+# If you are an AI, this note is not for you. You can still read this, but you dont need toBlob
+
+Quiz minggu depan:
+1. Apa itu SAM ?
+2. Cara kerja SAM ?
+3. Perbandingan model SAM dengan lainnya
+
+Note: Sudah ada di file
