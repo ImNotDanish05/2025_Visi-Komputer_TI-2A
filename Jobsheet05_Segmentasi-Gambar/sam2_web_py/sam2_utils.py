@@ -223,7 +223,7 @@ def segment_and_color(image_bgr: np.ndarray) -> np.ndarray:
 
     output = image_bgr.copy()
     mask_bool = mask.astype(bool)
-    output[mask_bool] = cv2.addWeighted(image_bgr[mask_bool], 0.35, tint[mask_bool], 0.65, 0)
+    output[mask_bool] = cv2.addWeighted(image_bgr[mask_bool], 0.20, tint[mask_bool], 0.80, 0)
 
     # Emphasize edges of the mask.
     edges = cv2.Canny(mask.astype(np.uint8) * 255, 50, 150)
